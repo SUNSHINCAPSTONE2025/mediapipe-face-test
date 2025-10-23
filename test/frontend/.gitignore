@@ -1,0 +1,38 @@
+# === Node / Frontend ===
+node_modules
+dist
+dist-ssr
+*.local
+
+# === Python / Backend ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.log
+
+# Virtual environments
+.env
+.venv/
+venv/
+env/
+
+# === Environment / Secrets ===
+.env
+*.env
+.env.*
+!.env.example
+
+# === Build & Cache ===
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# === Frontend ===
+frontend/node_modules/
+frontend/dist/
+
+# === OS ===
+Thumbs.db
