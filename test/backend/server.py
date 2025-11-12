@@ -37,7 +37,7 @@ FACE_MESH_VIDEO = mp_face_mesh.FaceMesh(
     min_tracking_confidence=0.5
 )
 
-# ---- 랜드마크 인덱스들 ----
+# 랜드마크 인덱스
 LEFT_EYE  = [33,160,158,133,153,144]
 RIGHT_EYE = [263,387,385,362,380,373]
 LEFT_EYE_CORNERS  = (33, 133)
@@ -45,7 +45,7 @@ RIGHT_EYE_CORNERS = (263, 362)
 LEFT_EYE_LIDS     = (159, 145)   # 위/아래 대표
 RIGHT_EYE_LIDS    = (386, 374)
 
-# iris(홍채) 대표 인덱스 (mediapipe 일반적으로 사용되는 예시)
+# iris(홍채) 대표 인덱스
 LEFT_IRIS_IDXS  = [474, 475, 476, 477]
 RIGHT_IRIS_IDXS = [469, 470, 471, 472]
 
@@ -55,7 +55,7 @@ MOUTH_UPPER_INNER  = 13
 MOUTH_LOWER_INNER  = 14
 NOSE_TIP = 1
 
-# ---- 임계치/파라미터 ----
+# 임계치/파라미터
 MOUTH_DELTA = 0.02
 GAZE_OFF_ABS = 0.12        # head-only
 EYE_OFF_ABS  = 0.35        # eye-only (정규화 오프셋)
@@ -64,16 +64,15 @@ BLINK_MIN_DUR = 0.08
 DEFAULT_BLINK_LIMIT = 30
 EMA_ALPHA = 0.25
 
-# 세션 상태
-# (yaw, pitch, ear, mouth, eye_hor, eye_ver) 수집
+# 세션 상태 (yaw, pitch, ear, mouth, eye_hor, eye_ver) 수집
 CALIB_BUFFER: Dict[str, List[Tuple[float,float,float,float,float,float]]] = {}
 SESSION_BASELINE: Dict[str, Dict[str, float]] = {}
 
 
-# ★ NEW: 서프라이즈 스냅샷 mouth 값들 저장
+# 서프라이즈 스냅샷 mouth 값들 저장
 SURPRISE_BUFFER: Dict[str, List[Dict]] = {}   # {session_id: [{"path": str, "mouth": float, "ts": str}, ...]}
 
-# ---------- 유틸 ----------
+# 유틸
 def norm_pt(lm, w, h):
     return np.array([lm.x * w, lm.y * h, lm.z], dtype=np.float32)
 
@@ -152,7 +151,7 @@ def bbox_from_indices(lms, w, h, idxs, pad_ratio=0.15):
     x2 = int(min(w-1, x2 + pw)); y2 = int(min(h-1, y2 + ph))
     return (x1, y1, x2, y2)
 
-# ----- JSON 안전화 유틸 -----
+# JSON 안전화 유틸
 def _safe_num(x):
     try:
         x = float(x)
@@ -169,7 +168,7 @@ def sanitize_for_json(obj):
         return _safe_num(obj)
     return obj
 
-# ----- 시선 지표 계산 (MAE/SD/BCEA/S2S) -----
+# 시선 지표 계산 (MAE/SD/BCEA/S2S)
 def compute_fixation_metrics(xs: List[float], ys: List[float], target=(0.0, 0.0)):
     if not xs or not ys or len(xs) != len(ys):
         return {"MAE": None, "SDx": None, "SDy": None, "rho": None, "BCEA": None, "S2S": None}
@@ -199,7 +198,7 @@ def compute_fixation_metrics(xs: List[float], ys: List[float], target=(0.0, 0.0)
 def _fmt4(x): return f"{x:.4f}" if (x is not None) else "n/a"
 def _fmt6(x): return f"{x:.6f}" if (x is not None) else "n/a"
 
-# ---------- 피처 추출 + (오버레이용) 포인트 ----------
+# 피처 추출 + (오버레이용) 포인트
 def features_from_bgr(bgr, mesh):
     """
     반환:
@@ -258,7 +257,7 @@ def features_from_bgr(bgr, mesh):
 
     return (yaw, pitch, ear, mouth, eye_h, eye_v), draw, bgr
 
-# ---------- 스냅샷 ----------
+# 스냅샷
 @app.post("/upload_snapshot")
 async def upload_snapshot(
     image: UploadFile = File(...),
@@ -291,7 +290,7 @@ async def upload_snapshot(
 
         if phase == "surprise":
             base = SESSION_BASELINE.get(session_id)
-            # ★ NEW: 기준 있든 없든 mouth를 버퍼에 누적 저장
+            # 기준 있든 없든 mouth를 버퍼에 누적 저장
             SURPRISE_BUFFER.setdefault(session_id, []).append({
                 "path": save_path.replace("\\","/"),
                 "mouth": float(mouth),
@@ -316,7 +315,7 @@ async def upload_snapshot(
     except Exception as e:
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
-# ---------- 캘리브레이션 완료 ----------
+# 캘리브레이션 완료
 @app.post("/finalize_calibration")
 async def finalize_calibration(session_id: str = Form(...)):
     buf = CALIB_BUFFER.get(session_id, [])
@@ -333,7 +332,7 @@ async def finalize_calibration(session_id: str = Form(...)):
     CALIB_BUFFER[session_id] = []
     return {"baseline": baseline, "frames_used": int(arr.shape[0])}
 
-# ---------- 동영상 분석 ----------
+# 동영상 분석
 @app.post("/analyze_video")
 async def analyze_video(
     video: UploadFile = File(...),
@@ -456,7 +455,7 @@ async def analyze_video(
                 EYE_OK = (abs(eye_h_corr) <= EYE_OFF_ABS) and (abs(eye_v_corr) <= EYE_OFF_ABS)
                 if EYE_OK: stats["frames_eye_ok"] += 1
 
-            # 결합 판정(엄격: AND)
+            # 결합 판정
             HEAD_EYE_OK = HEAD_OK and EYE_OK
             if HEAD_EYE_OK: stats["frames_head_eye_ok"] += 1
 

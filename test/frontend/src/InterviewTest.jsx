@@ -55,7 +55,7 @@ function KV({ k, v }) {
 }
 
 export default function InterviewUI() {
-  // ===== Refs/State =====
+  // Refs/State
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -94,7 +94,7 @@ export default function InterviewUI() {
 
   const api = (p) => `${API_BASE.replace(/\/$/, "")}${p.startsWith("/") ? p : `/${p}`}`;
 
-  // ===== Camera =====
+  // Camera 
   const startCam = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -184,7 +184,7 @@ export default function InterviewUI() {
     }, 200);
   };
 
-  // ===== Q&A + Surprise =====
+  // Q&A + Surprise
   const chooseRandomIndices = (n, kMin = 2, kMax = 3) => {
     const target = Math.min(n, Math.max(kMin, Math.min(kMax, kMin + Math.floor(Math.random() * (kMax - kMin + 1)))));
     const s = new Set();
@@ -239,7 +239,7 @@ export default function InterviewUI() {
     return `${Math.min(qIdx + 1, questions.length)} / ${questions.length} · 남은 서프라이즈 ${left}`;
   }, [questions.length, qIdx, captureIdxs.length, capturesDone]);
 
-  // ===== Analyze Video =====
+  // Analyze Video 
   const analyzeVideo = async () => {
     if (!file) {
       log("❌ MP4 파일을 선택하세요.");
@@ -277,7 +277,7 @@ export default function InterviewUI() {
     log(`영상 분석 완료 (frames=${j.processed_frames}, stride=${j.frame_stride})`);
   };
 
-  // ===== Analyze Surprise Photos (NEW) =====
+  // Analyze Surprise Photos
   const analyzeSurprisePhotos = async () => {
     const id = ensureSession();
     setSurpriseHTML("분석 중…");
@@ -299,7 +299,7 @@ export default function InterviewUI() {
     log(`서프라이즈 스냅샷 분석 완료 (count=${j?.summary?.surprise_count ?? "?"})`);
   };
 
-  // ===== Render =====
+  // Render
   return (
     <div className="wrap">
       <style>{CSS}</style>
